@@ -20,18 +20,16 @@ def play_game():
     bot_board = [["." for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
 
     bot_moves = set()
-    bot_targets = []
-    bot_last_hits = []
-
     turn = 1
     log = []
 
     while player_ships and bot_ships:
+        print(f"\n--- Turn {turn} ---")
         print_board(bot_board, "BOT BOARD")
 
         while True:
             try:
-                move = input("Your move x y: ").split()
+                move = input("Your move x y (1-10): ").split()
                 if len(move) != 2:
                     print("Enter exactly two numbers")
                     continue
@@ -39,12 +37,13 @@ def play_game():
                 if not (0 <= x < BOARD_SIZE and 0 <= y < BOARD_SIZE):
                     print("Coordinates out of board")
                     continue
-                if bot_board[y][x] in ["X", "o"]:
+                if bot_board[y][x] in ["X","o"]:
                     print("Cell already targeted")
                     continue
                 break
             except:
                 print("Invalid input, try again")
+
         hit = False
         for sid in list(bot_ships.keys()):
             if (x,y) in bot_ships[sid]:
@@ -57,21 +56,12 @@ def play_game():
                         if bot_board[cy][cx] == ".":
                             bot_board[cy][cx] = "o"
                     del bot_ships[sid]
-                    bot_targets.clear()
-                    bot_last_hits.clear()
-                else:
-                    bot_targets = [(x+1,y),(x-1,y),(x,y+1),(x,y-1)]
-                    bot_targets = [c for c in bot_targets if 0<=c[0]<BOARD_SIZE and 0<=c[1]<BOARD_SIZE and (c[0],c[1]) not in bot_moves]
-                    bot_last_hits = [(x,y)]
                 break
         if not hit:
             bot_board[y][x] = "o"
 
         while True:
-            if bot_targets:
-                bx, by = bot_targets.pop(0)
-            else:
-                bx, by = random.randint(0,BOARD_SIZE-1), random.randint(0,BOARD_SIZE-1)
+            bx, by = random.randint(0, BOARD_SIZE-1), random.randint(0, BOARD_SIZE-1)
             if (bx,by) not in bot_moves:
                 bot_moves.add((bx,by))
                 break
@@ -88,28 +78,11 @@ def play_game():
                         if player_board[cy][cx] == ".":
                             player_board[cy][cx] = "o"
                     del player_ships[sid]
-                    bot_targets.clear()
-                    bot_last_hits.clear()
-                else:
-
-                    new_targets = [(bx+1,by),(bx-1,by),(bx,by+1),(bx,by-1)]
-                    new_targets = [c for c in new_targets if 0<=c[0]<BOARD_SIZE and 0<=c[1]<BOARD_SIZE and (c[0],c[1]) not in bot_moves]
-                    bot_targets.extend(new_targets)
-                    bot_last_hits.append((bx,by))
                 break
         if not bhit:
             player_board[by][bx] = "o"
 
         print_board(player_board, "PLAYER BOARD")
-
-        remaining_player = len(player_ships)
-        remaining_bot = len(bot_ships)
-        destroyed_player = len(player_ship_sizes) - remaining_player
-        destroyed_bot = len(bot_ship_sizes) - remaining_bot
-
-        print(f"Your remaining ships: {remaining_player}, destroyed: {destroyed_player}")
-        print(f"Bot remaining ships: {remaining_bot}, destroyed: {destroyed_bot}")
-
 
         log.append({
             "turn": turn,
@@ -123,3 +96,7 @@ def play_game():
         turn += 1
 
     print("Game over")
+    if not player_ships:
+        print("Bot wins!")
+    else:
+        print("You win!")
