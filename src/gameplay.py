@@ -5,9 +5,11 @@ from src.utils import print_board, neighbors, BOARD_SIZE
 def load_ships(path):
     df = pd.read_csv(path)
     ships = {}
-    for _, r in df.iterrows():
-        ships.setdefault(r.ship, set()).add((r.x, r.y))
+    for ship_id in df['ship'].unique():
+        coords = df[df['ship'] == ship_id][['x','y']].values
+        ships[ship_id] = set((x,y) for x,y in coords) 
     return ships
+
 
 def play_game():
     player_ships = load_ships("data/player_ships.csv")
